@@ -1,0 +1,309 @@
+<apex:page contentType="text/javascript" >
+         
+       var isstdpage ;
+       var currenturl  = window.parent.location.href;
+       var whereclause ;
+       
+       if (/visual.force.com/i.test(currenturl)) {
+          
+          console.log(" *** VF page *** "   );
+          
+          isstdpage = false ;
+           
+       } else if (/salesforce.com/i.test(currenturl)) {
+      
+          console.log(" *** STD page *** "   );
+                         
+          isstdpage = true ;
+           
+       }
+       
+        
+       console.log(" *** LOAD AUTO COMPLETE FILES *** "); 
+       var scripts = document.getElementsByTagName('script');
+       loadScript("//code.jquery.com/jquery-2.1.1.min.js",main);
+       loadScript("//code.jquery.com/ui/1.11.1/jquery-ui.js",donothing);
+       loadScript("/soap/ajax/32.0/connection.js",donothing);
+       loadScript("/soap/ajax/32.0/apex.js",donothing);
+       
+       
+       function loadScript(sScriptSrc, oCallback) {
+            var oHead = document.getElementsByTagName('head')[0];
+            var oScript = document.createElement('script');
+            oScript.type = 'text/javascript';
+            oScript.src = sScriptSrc;
+            oScript.async = false;
+            oScript.onload = oCallback;
+            oScript.onreadystatechange = function() {
+                if (this.readyState == 'complete') {
+                    oCallback();
+                }
+            }
+            oHead.appendChild(oScript);
+        }
+        
+        function donothing() {
+        
+        }
+        
+        /*** MAIN FUNCTION ****/
+                    
+        function main() {
+
+          $j = jQuery.noConflict();
+          
+          $j(document).ready(function(){
+                       
+              console.log(" *** jQuery STARTS *** "); 
+              
+              $j.when(
+                     
+                    $j("<link/>", {
+                       rel: "stylesheet",
+                       type: "text/css",
+                       href: "//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css"
+                    }).appendTo("head"),
+                    
+
+                    $j.Deferred(function( deferred ){
+                        $j( deferred.resolve );
+                    })
+                ).done(function(){
+                    
+                    console.log(" *** AUTO COMPLETE STARTS *** "); 
+                    
+                    var configquery ;
+                    var configqueryresults = [] ;
+                    var lookupfields = [] ;
+                     
+                    
+                    sforce.connection.sessionId = "{!$Api.Session_ID}";
+                    configquery =  " SELECT Name, lookupfieldidentfier__c, LookUp_Object_API_Name__c, Field_1_API_Name__c, Field_1_Label__c, Field_1_Size__c, ";
+                    configquery +=  " Field_2_API_Name__c, Field_2_Label__c, Field_2_Size__c, Field_3_API_Name__c, Field_3_Label__c, Field_3_Size__c,  ";
+                    configquery +=  " Field_4_API_Name__c, Field_4_Label__c, Field_4_Size__c, Field_5_API_Name__c, Field_5_Label__c, Field_5_Size__c   ";
+                    configquery += " FROM LookUpAutoComplete__c ";
+                    
+                    
+                    configqueryresults = sforce.connection.query( configquery ) ;
+                    
+                      
+                     $j.each(configqueryresults.getArray("records"), function (i, x) { 
+                           lookupfields.push({
+                               fieldId:     x.lookupfieldidentfier__c , 
+                               lookupobj:   x.LookUp_Object_API_Name__c,
+                               searchcolumn: x.Search_Column__c,
+                               field1label: x.Field_1_Label__c,
+                               field1value: x.Field_1_API_Name__c ,
+                               field1size:  x.Field_1_Size__c,
+                               field2label: x.Field_2_Label__c,
+                               field2value: x.Field_2_API_Name__c ,
+                               field2size:  x.Field_2_Size__c,
+                               field3label: x.Field_3_Label__c,
+                               field3value: x.Field_3_API_Name__c ,
+                               field3size:  x.Field_3_Size__c,
+                               field4label: x.Field_4_Label__c,
+                               field4value: x.Field_4_API_Name__c ,
+                               field4size:  x.Field_4_Size__c,
+                               field5label: x.Field_5_Label__c,
+                               field5value: x.Field_5_API_Name__c ,
+                               field5size:  x.Field_5_Size__c
+                           }); 
+                                          
+                      });
+                    
+                    /*** Find KeyPressed in lookup field ****/
+                    
+                     $j(".lookupInput").click(function(){ 
+                        
+                       $j('.lookupInput > :input').on('keypress', function () {   
+                          console.log(" *** KEY PRESSED *** "   );
+                          
+                          var matchedlookup = 99999 ;   
+                          
+                          var currentfieldidentifier ;
+                          if ( isstdpage ) {
+                              currentfieldidentifier = $j(this).attr("id");
+                          } else {
+                              currentfieldidentifier = $j(this).attr("class");
+                          }
+                          
+                          console.log(" *** currentfieldidentifier *** "  + currentfieldidentifier  );
+                          
+                          var inputstr = $j(this).val() ;
+                                
+                            $j.each(lookupfields, function (i, x) { 
+                                if ( currentfieldidentifier === x.fieldId ) {  
+                                    matchedlookup = i ;
+                                }
+                            });
+                                                          
+                            if ( matchedlookup !== 99999 ) {  console.log(" *** KEY PRESSED *** "   );
+                                lookupautocomplete( $j(this)  ,lookupfields[matchedlookup]);    
+                            }    
+                        });
+                        
+                    
+                    });
+                      
+                      /*** AUTOCOMPLETE FUNCTION ****/ 
+                      
+                      function lookupautocomplete(fieldId,obj){  
+                          
+                            
+                          $j.ui.autocomplete.prototype._renderMenu = function(ul, items) {
+                              var self = this;
+
+                              //table definitions
+                              var header = " " ;
+                              if ( obj.field1label ) {
+                                  header +=   '<th>'+ obj.field1label +'</th>' ;
+                              }
+                              if ( obj.field2label ) {
+                                  header +=   '<th>'+ obj.field2label +'</th>' ;
+                              }
+                              if ( obj.field3label ) {
+                                  header +=   '<th>'+ obj.field3label +'</th>' ;
+                              }
+                              if ( obj.field4label ) {
+                                  header +=   '<th>'+ obj.field4label +'</th>' ;
+                              }
+                              if ( obj.field5label ) {
+                                  header +=   '<th>'+ obj.field5label +'</th>' ;
+                              }
+                              
+                              ul.append('<table class="tablesorter" ><thead><tr> '+ header +' </tr></thead><tbody></tbody></table>');
+                              
+                              $j.each( items, function( index, item ) {
+                                self._renderItemData(ul, ul.find("table tbody"), item );
+                              });
+                            };
+                            
+                            $j.ui.autocomplete.prototype._renderItemData = function(ul,table, item) {
+                              return this._renderItem( table, item ).data( "ui-autocomplete-item", item );
+                            }; 
+                            
+                            $j.ui.autocomplete.prototype._renderItem = function(table, item) {
+                            
+                            var field1value = item.field1value  ; 
+                            
+                            var re = new RegExp("^" + this.term) ;  
+                            field1value = field1value.replace(re,'<span style="font-weight:bold;color:Blue;">' + this.term + "</span>");
+
+
+                            var columns = " " ; 
+                            if ( obj.field1value ) {
+                                var setwidth ='' ;
+                                if ( obj.field1size){
+                                    setwidth = obj.field1size ;
+                                }
+                                columns +=  '<td  width="'+setwidth+'" > '+ item.field1value +' </td>';
+                            }
+                            if ( obj.field2value ) {
+                                var setwidth ='' ;
+                                if ( obj.field2size){
+                                    setwidth = obj.field2size ;
+                                }
+                                columns +=  '<td  width="'+setwidth+'" > '+ item.field2value +' </td>';
+                            }
+                            if ( obj.field3value ) {
+                                var setwidth ='' ;
+                                if ( obj.field3size){
+                                    setwidth = obj.field3size ;
+                                }
+                                columns +=  '<td  width="'+setwidth+'" > '+ item.field3value +' </td>';
+                            }
+                            if ( obj.field4value ) {
+                                var setwidth ='' ;
+                                if ( obj.field4size){
+                                    setwidth = obj.field4size ;
+                                }
+                                columns +=  '<td  width="'+setwidth+'" > '+ item.field4value +' </td>';
+                            }
+                            if ( obj.field5value ) {
+                                var setwidth ='' ;
+                                if ( obj.field5size){
+                                    setwidth = obj.field5size ;
+                                }
+                                columns +=  '<td  width="'+setwidth+'" > '+ item.field5value +' </td>';
+                            }
+                            
+                              return $j( '<tr class="ui-menu-item"  ></tr>' )
+                                .append(columns)
+                                .appendTo( table );
+                            };  
+                                
+                          $j(fieldId).autocomplete({
+                                         
+                             source: function( request, sourceresponse ) {
+                                  var search = "'%"+request.term+"%'";   console.log(" *** search "   + search); 
+                                  
+                                  var buildquery = "SELECT Id, " + obj.field1value ;
+                                  if ( obj.field2value ) {
+                                      buildquery += ", " + obj.field2value ;
+                                  }
+                                  if ( obj.field3value ) {
+                                      buildquery += ", " + obj.field3value ;
+                                  }
+                                  if ( obj.field4value ) {
+                                      buildquery += ", " + obj.field4value ;
+                                  }
+                                  if ( obj.field5value ) {
+                                      buildquery += ", " + obj.field5value ;
+                                  }
+                                  
+                                  buildquery += " FROM "+ obj.lookupobj +  "  WHERE " + obj.field1value + " LIKE " + search ;
+
+                                  var results = sforce.connection.query( buildquery ) ;   
+                                  var finalresults = [] ;  
+                                    
+                                    $j.each(results.getArray("records"), function (i, x) { 
+                                        
+                                        var field1 = '',  field2 = '', field3 = '',field4 = '',field5 = '' ;
+                                        
+                                        if ( x[obj.field1value] ) {
+                                            field1 = x[obj.field1value] ;
+                                        }
+                                        if ( x[obj.field2value] ) {
+                                            field2 = x[obj.field2value] ;
+                                        }
+                                        if ( x[obj.field3value] ) {
+                                            field3 = x[obj.field3value] ;
+                                        }
+                                        if ( x[obj.field4value] ) {
+                                            field4 = x[obj.field4value] ;
+                                        }
+                                        if ( x[obj.field5value] ) {
+                                            field5 = x[obj.field5value] ;
+                                        }
+                                        
+                                        finalresults.push({
+                                           label: field1,
+                                           value: field1,
+                                           field1value: field1,
+                                           field2value: field2,
+                                           field3value: field3,
+                                           field4value: field4,
+                                           field5value: field5
+                                       }); 
+                                                      
+                                    });
+                                    
+                                     sourceresponse(finalresults );
+                                  
+                              },
+                              focus: function( event, ui ) {  
+                                 $j(fieldId).val( ui.item.field1value );
+                                 return false;
+                             }
+                             
+                         });
+                       
+                      }
+               });
+          
+          });
+        
+        }
+                    
+   
+</apex:page>
