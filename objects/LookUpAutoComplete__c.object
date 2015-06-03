@@ -24,9 +24,9 @@
         <unique>false</unique>
     </fields>
     <fields>
-        <fullName>Field_1_Size__c</fullName>
+        <fullName>Field_1_width__c</fullName>
         <externalId>false</externalId>
-        <label>Field 1 Size</label>
+        <label>Field 1 width</label>
         <precision>3</precision>
         <required>false</required>
         <scale>0</scale>
@@ -55,9 +55,9 @@
         <unique>false</unique>
     </fields>
     <fields>
-        <fullName>Field_2_Size__c</fullName>
+        <fullName>Field_2_width__c</fullName>
         <externalId>false</externalId>
-        <label>Field 2 Size</label>
+        <label>Field 2 width</label>
         <precision>4</precision>
         <required>false</required>
         <scale>0</scale>
@@ -86,9 +86,9 @@
         <unique>false</unique>
     </fields>
     <fields>
-        <fullName>Field_3_Size__c</fullName>
+        <fullName>Field_3_width__c</fullName>
         <externalId>false</externalId>
-        <label>Field 3 Size</label>
+        <label>Field 3 width</label>
         <precision>4</precision>
         <required>false</required>
         <scale>0</scale>
@@ -117,9 +117,9 @@
         <unique>false</unique>
     </fields>
     <fields>
-        <fullName>Field_4_Size__c</fullName>
+        <fullName>Field_4_width__c</fullName>
         <externalId>false</externalId>
-        <label>Field 4 Size</label>
+        <label>Field 4 width</label>
         <precision>4</precision>
         <required>false</required>
         <scale>0</scale>
@@ -148,9 +148,9 @@
         <unique>false</unique>
     </fields>
     <fields>
-        <fullName>Field_5_Size__c</fullName>
+        <fullName>Field_5_width__c</fullName>
         <externalId>false</externalId>
-        <label>Field 5 Size</label>
+        <label>Field 5 width</label>
         <precision>4</precision>
         <required>false</required>
         <scale>0</scale>
@@ -171,12 +171,12 @@
     </fields>
     <fields>
         <fullName>lookupfieldidentfier__c</fullName>
-        <description>If lookup is on Standard page Provide Lookup field id
-If lookup is on Visualforce page Provide Lookup css name
-
-Use Inspect Element from your browser to find the lookup field id</description>
         <externalId>false</externalId>
-        <label>Lookup Field Identfier</label>
+        <inlineHelpText>If lookup field is on Standard page Provide Lookup field id
+If lookup field is on Visualforce page Provide Lookup css name
+
+Use Inspect Element from your browser to find the lookup field id</inlineHelpText>
+        <label>Lookup Field id/css</label>
         <length>100</length>
         <required>true</required>
         <trackTrending>false</trackTrending>
